@@ -1,3 +1,7 @@
+import os
+
+from wg_gesucht.search_settings import SearchSettings, load_search_settings
+
 # Scrapy settings for wg_gesucht project
 #
 # For simplicity, this file contains only settings considered important or
@@ -92,3 +96,11 @@ ROBOTSTXT_OBEY = True
 REQUEST_FINGERPRINTER_IMPLEMENTATION = "2.7"
 TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
+
+# Loading Search Settings from env
+SEARCH_SETTINGS: SearchSettings = load_search_settings(
+    city_name=os.environ.get("CITY_NAME"),
+    only_permanent_contracts=os.environ.get("ONLY_PERMANENT_CONTRACTS"),
+    max_rent=os.environ.get("MAX_RENT"),
+    min_rooms=os.environ.get("MIN_ROOMS"),
+)
