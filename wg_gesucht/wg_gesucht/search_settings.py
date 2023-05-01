@@ -14,27 +14,55 @@ class SearchSettings:
         city_name: Optional[str],
         only_permanent_contracts: bool = False,
         max_rent: Optional[int] = None,
+        min_rooms: Optional[float] = None,
+    ):
+        self._validate_init_params(
+            city_name=city_name,
+            only_permanent_contracts=only_permanent_contracts,
+            max_rent=max_rent,
+            min_rooms=min_rooms,
+        )
+
+        self.city_name = city_name
+        self.only_permanent_contracts = only_permanent_contracts
+
+        if max_rent:
+            self.max_rent = int(max_rent)
+
+        if min_rooms:
+            self.min_rooms = float(min_rooms)
+
+    def _validate_init_params(
+        self,
+        city_name: Optional[str],
+        only_permanent_contracts: bool = False,
+        max_rent: Optional[int] = None,
         min_rooms: Optional[int] = None,
     ):
-        self.city_name = city_name
-        self.max_rent = max_rent
-        self.min_rooms = min_rooms
-        self.only_permanent_contracts = only_permanent_contracts
-        self._validate_settings()
-
-    def _validate_settings(self):
-        if not self.city_name:
+        if not city_name:
             raise ValueError("city_name must be set")
 
-        if not isinstance(self.city_name, str):
+        if not isinstance(city_name, str):
             raise TypeError("city_name must be of type str")
 
-        if not isinstance(self.max_rent, int):
-            raise TypeError("max_rent must be of type int")
+        if not isinstance(only_permanent_contracts, bool):
+            raise TypeError("only_permanent_contracts must be of type bool")
 
-        if not isinstance(self.min_rooms, int):
-            raise TypeError("min_rooms must be of type int")
+        if max_rent:
+            if not isinstance(max_rent, int):
+                raise TypeError("max_rent must be of type int")
 
-        # todo next: test validation of settings
-        # cast numbers to int if possible
+            if max_rent < 0 or max_rent > 9999:
+                raise ValueError("max_rent be between 0 and 9999, inclusive")
+
+        if min_rooms:
+            if not isinstance(min_rooms, int) and not isinstance(min_rooms, float):
+                raise TypeError("min_rooms must be a number")
+
+            if min_rooms < 1 or min_rooms > 9:
+                raise ValueError("min_rooms be between 1 and 9, inclusive")
+
+            if isinstance(min_rooms, float) and min_rooms % 0.5 != 0:
+                raise ValueError("min_rooms must be a multiple of 0.5")
+
         # log pretty printed settings, maybe use __repr__?
