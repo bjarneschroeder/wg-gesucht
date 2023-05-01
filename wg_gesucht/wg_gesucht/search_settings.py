@@ -52,8 +52,8 @@ class SearchSettings:
             if not isinstance(max_rent, int):
                 raise TypeError("max_rent must be of type int")
 
-            if max_rent < 0 or max_rent > 9999:
-                raise ValueError("max_rent be between 0 and 9999, inclusive")
+            if max_rent < 1 or max_rent > 9999:
+                raise ValueError("max_rent be between 1 and 9999, inclusive")
 
         if min_rooms:
             if not isinstance(min_rooms, int) and not isinstance(min_rooms, float):
