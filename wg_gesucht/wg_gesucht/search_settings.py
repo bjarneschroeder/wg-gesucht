@@ -103,6 +103,7 @@ def load_search_settings(
             min_rooms=min_rooms,
         )
         logging.info("Starting with the following settings: ", settings)
+        return settings
     except (ValueError, TypeError) as e:
         logging.error("Error while loading search settings. Please check the input.")
         logging.error(f"Error: {e}")
