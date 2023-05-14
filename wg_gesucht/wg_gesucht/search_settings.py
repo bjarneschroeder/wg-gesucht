@@ -70,8 +70,8 @@ class SearchSettings:
             if not min_rooms.replace(".", "").isnumeric():
                 raise ValueError("min_rooms must be a number")
 
-            if float(min_rooms) < 1 or float(min_rooms) > 9:
-                raise ValueError("min_rooms be between 1 and 9, inclusive")
+            if float(min_rooms) < 2 or float(min_rooms) > 9:
+                raise ValueError("min_rooms be between 2 and 9, inclusive")
 
             if "." in min_rooms and float(min_rooms) % 0.5 != 0:
                 raise ValueError("min_rooms must be a multiple of 0.5")
