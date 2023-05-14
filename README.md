@@ -24,7 +24,7 @@ Name of the city you are searching a flat in.
 Optional `float|int`.
 The minimum amount of rooms a flat should have.
 Has to be a whole number or `.5` decimal between
-`1-9`, inclusive.
+`2-9`, inclusive.
 
 `MAX_RENT`:
 Optional `int`.

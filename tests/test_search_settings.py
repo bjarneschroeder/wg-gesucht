@@ -40,16 +40,19 @@ class TestSearchSettingsInit:
         with pytest.raises(ValueError):
             SearchSettings(city_name="Berlin", min_rooms="10")
 
+        with pytest.raises(ValueError):
+            SearchSettings(city_name="Berlin", min_rooms="1")
+
     def test_min_rooms_not_half_step_value(self):
         with pytest.raises(ValueError):
-            SearchSettings(city_name="Berlin", min_rooms="1.3")
+            SearchSettings(city_name="Berlin", min_rooms="3.3")
 
     def test_min_rooms_half_step(self):
-        settings = SearchSettings(city_name="Berlin", min_rooms="1.5")
+        settings = SearchSettings(city_name="Berlin", min_rooms="2.5")
         assert settings.city_name == "Berlin"
         assert settings.only_permanent_contracts is False
         assert settings.max_rent is None
-        assert settings.min_rooms == 1.5
+        assert settings.min_rooms == 2.5
 
     def test_city_name(self):
         settings = SearchSettings(city_name="Berlin")
