@@ -1,9 +1,13 @@
 import json
 import logging
+import re
 from typing import Final, Optional
 from urllib.parse import urlencode
 
-from scrapy import Request, Spider
+from itemloaders.processors import TakeFirst
+from scrapy import Request, Selector, Spider
+from wg_gesucht.items import FlatItem
+from wg_gesucht.loaders import FlatItemLoader
 from wg_gesucht.search_settings import SearchSettings
 
 
@@ -101,6 +105,82 @@ class WgGesuchtSpider(Spider):
         }
         return text.translate(str.maketrans(umlaut_replacements))
 
-    def parse_flat_detail_links(self, response):
-        if response.body:
-            logging.info("Got flats page.")
+    def parse_flat_detail_links(self, response) -> Request | None:
+        # not containing onclick, because thats just an ad
+        flat_item_containers: Final[list[Selector]] = response.xpath(
+            '//div[contains(@class, "wgg_card offer_list_item") \
+            and not(contains(@onclick, " "))]'
+        )
+
+        for flat_container in flat_item_containers:
+            flat_detail_link: Final[Selector] = flat_container.xpath(
+                ".//div/div/div/div/h3/a/@href"
+            ).get()
+
+            yield response.follow(
+                flat_detail_link,
+                callback=self.parse_flat,
+            )
+
+    def parse_flat(self, response) -> FlatItem:
+        flat_loader: Final[FlatItemLoader] = FlatItemLoader(
+            item=FlatItem(), response=response
+        )
+        flat_loader.add_xpath("id", "//div/i/@data-ad_id")
+        flat_loader.add_value("url", response.request.url)
+
+        flat_loader.add_xpath("title", "//title/text()")
+        basic_facts: Final[FlatItemLoader] = flat_loader.nested_xpath(
+            '//div[@id="basic_facts_wrapper"]/div[@id="rent_wrapper"]'
+        )
+        basic_facts.add_xpath(
+            "rooms",
+            './/div[@class="basic_facts_bottom_part"]/label[@class="amount"]/text()',
+        )
+        basic_facts.add_xpath(
+            "size",
+            './/div[@class="basic_facts_top_part"]/label[@class="amount"]/text()',
+        )
+
+        flat_loader.add_xpath(
+            "rent_costs", '//div[@id="rent"]/label[@class="graph_amount"]/text()'
+        )
+        flat_loader.add_xpath(
+            "utilities_costs",
+            '//div[@id="utilities_costs"]/label[@class="graph_amount"]/text()',
+        )
+        flat_loader.add_xpath(
+            "additional_flat_costs",
+            '//div[@id="misc_costs"]/label[@class="graph_amount"]/text()',
+        )
+
+        provision_equipment_xpath: Final[str] = '//div[@class="provision-equipment"]'
+        description_path: Final[str] = '/label[@class="description"]/text()'
+        assert "kaution" in flat_loader.get_xpath(
+            f"{provision_equipment_xpath}[1]{description_path}", TakeFirst(), str.lower
+        )
+        assert "ablösevereinbarung" in flat_loader.get_xpath(
+            f"{provision_equipment_xpath}[2]{description_path}", TakeFirst(), str.lower
+        )
+        amount_path: Final[str] = '/label[@class="amount"]/text()'
+        flat_loader.add_xpath("deposit", f"{provision_equipment_xpath}[1]{amount_path}")
+        flat_loader.add_xpath(
+            "other_costs", f"{provision_equipment_xpath}[2]{amount_path}"
+        )
+
+        address_strings: Final[list[str] | None] = response.xpath(
+            '//a[@href="#mapContainer"]/text()'
+        ).getall()
+
+        flat_loader.add_value("street", address_strings[0])
+        postal_code, city_name = re.split(r"(?<=\d)\s", address_strings[1], maxsplit=1)
+        flat_loader.add_value("postal_code", postal_code)
+        flat_loader.add_value("city_name", city_name)
+
+        move_in_date_txt: Final[str] = response.xpath(
+            '//div[@class="col-sm-3"]/p/b/text()'
+        ).get()
+        flat_loader.add_value("move_in_date", move_in_date_txt)
+        flat_loader.add_value("move_in_date_ts", move_in_date_txt)
+
+        yield flat_loader.load_item()

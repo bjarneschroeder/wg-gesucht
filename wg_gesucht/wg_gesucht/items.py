@@ -6,7 +6,19 @@
 import scrapy
 
 
-class WgGesuchtItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
+class FlatItem(scrapy.Item):
+    id = scrapy.Field()
+    url = scrapy.Field()
+    title = scrapy.Field()
+    rooms = scrapy.Field()
+    size = scrapy.Field()
+    rent_costs = scrapy.Field()
+    utilities_costs = scrapy.Field()
+    additional_flat_costs = scrapy.Field()
+    other_costs = scrapy.Field()
+    deposit = scrapy.Field()
+    street = scrapy.Field()
+    postal_code = scrapy.Field()
+    city_name = scrapy.Field()
+    move_in_date = scrapy.Field()
+    move_in_date_ts = scrapy.Field()
