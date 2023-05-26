@@ -2,6 +2,8 @@ import logging
 from dataclasses import dataclass
 from typing import Optional
 
+logger = logging.getLogger()
+
 
 @dataclass
 class SearchSettings:
@@ -102,9 +104,9 @@ def load_search_settings(
             max_rent=max_rent,
             min_rooms=min_rooms,
         )
-        logging.info("Starting with the following settings: ", settings)
+        logger.info("Starting with the following settings: ", settings)
         return settings
     except (ValueError, TypeError) as e:
-        logging.error("Error while loading search settings. Please check the input.")
-        logging.error(f"Error: {e}")
+        logger.error("Error while loading search settings. Please check the input.")
+        logger.error(f"Error: {e}")
         raise

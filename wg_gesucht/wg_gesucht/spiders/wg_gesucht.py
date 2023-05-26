@@ -10,6 +10,7 @@ from wg_gesucht.search_settings import SearchSettings
 class WgGesuchtSpider(Spider):
     name = "wg_gesucht"
     _search_settings: SearchSettings
+    _logger = logging.getLogger()
 
     def start_requests(self):
         self._search_settings: SearchSettings = self.settings.get("SEARCH_SETTINGS")
@@ -24,7 +25,7 @@ class WgGesuchtSpider(Spider):
 
     def parse_city_response(self, response):
         if not response.body:
-            logging.error("Response body is empty")
+            self._logger.error("Response body is empty")
             return
 
         city_data: Final[dict] = json.loads(response.body)
@@ -33,7 +34,7 @@ class WgGesuchtSpider(Spider):
             city_data=city_data
         )
         if not city_id:
-            logging.error(f"City '{self._search_settings.city_name}' not found")
+            self._logger.error(f"City '{self._search_settings.city_name}' not found")
             return
         else:
             params: Final[dict] = self._load_search_request_params()
