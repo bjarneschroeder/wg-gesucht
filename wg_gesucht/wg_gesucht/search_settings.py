@@ -2,6 +2,8 @@ import logging
 from dataclasses import dataclass
 from typing import Optional
 
+logger = logging.getLogger()
+
 
 @dataclass
 class SearchSettings:
@@ -70,8 +72,8 @@ class SearchSettings:
             if not min_rooms.replace(".", "").isnumeric():
                 raise ValueError("min_rooms must be a number")
 
-            if float(min_rooms) < 1 or float(min_rooms) > 9:
-                raise ValueError("min_rooms be between 1 and 9, inclusive")
+            if float(min_rooms) < 2 or float(min_rooms) > 9:
+                raise ValueError("min_rooms be between 2 and 9, inclusive")
 
             if "." in min_rooms and float(min_rooms) % 0.5 != 0:
                 raise ValueError("min_rooms must be a multiple of 0.5")
@@ -102,8 +104,9 @@ def load_search_settings(
             max_rent=max_rent,
             min_rooms=min_rooms,
         )
-        logging.info("Starting with the following settings: ", settings)
+        logger.info("Starting with the following settings: ", settings)
+        return settings
     except (ValueError, TypeError) as e:
-        logging.error("Error while loading search settings. Please check the input.")
-        logging.error(f"Error: {e}")
+        logger.error("Error while loading search settings. Please check the input.")
+        logger.error(f"Error: {e}")
         raise
