@@ -1,15 +1,27 @@
 # WG-Gesucht Spider
 This repository contains a scrapy project for scraping the german real estate website wg-gesucht.de.
 
-Currently found flats will just be returned by the pipeline.
-MongoDB connection or JSON Export are planned.
-Please mind that this is only a sideproject for fun.
-
 May it help you maybe to find a flat really fast or to build a cool dataset.
+
+**Please use the spider responsibly,
+keep requests to a minimum.
+No one likes bot traffic.**
+
+## Scope and limitations of the project
+
+Currently found flats will just be returned by the pipeline.
+MongoDB connection or JSON Export are planned though.
+
+Also only the first site is processed.
+The scraper is thought to be scheduled more frequently,
+so one gets notified earlier when flats are available.
+
+Currently the scraper only collects individual flat offers,
+no shared apartments.
 
 ## Possible Settings and Starting the Spider
 
-The spider is started in a Docker container.
+The spider can be started as a Docker container.
 Search settings are given via the enviornment,
 when starting the spider.
 
@@ -73,7 +85,7 @@ MAX_RENT=1200
 ONLY_PERMANENT_CONTRACTS=true
 ```
 
-Run the container with:
+You can then run the container with:
 
 ```shell
 docker run --env-file /path/to/your/env/file
