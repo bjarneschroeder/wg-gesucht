@@ -11,8 +11,8 @@ class DatabaseSettings:
 
     def __init__(
         self,
-        db_name: str,
         connection_uri: str,
+        db_name: str,
     ):
         self._validate_init_params(
             db_name=db_name,
@@ -40,8 +40,8 @@ class DatabaseSettings:
 
 
 def load_db_settings(
-    db_name: str,
     connection_uri: str,
+    db_name: str,
 ) -> DatabaseSettings:
     try:
         return DatabaseSettings(
