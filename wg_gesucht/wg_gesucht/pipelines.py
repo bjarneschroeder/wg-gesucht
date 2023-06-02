@@ -9,8 +9,9 @@ from itemadapter import ItemAdapter
 from pymongo import MongoClient
 from pymongo.collection import Collection
 from pymongo.database import Database
-from pymongo.errors import ServerSelectionTimeoutError
+from pymongo.errors import ServerSelectionTimeoutError, WriteError
 from wg_gesucht.db_settings import DatabaseSettings
+from wg_gesucht.items import FlatItem
 
 
 class WgGesuchtPipeline:
@@ -48,6 +49,13 @@ class WgGesuchtPipeline:
                 "Please check given connection parameters."
             )
 
-    def process_item(self, item, spider):
-        self._collection.insert_one(ItemAdapter(item).asdict())
+    def process_item(self, item: FlatItem, spider):
+        try:
+            self._collection.insert_one(ItemAdapter(item).asdict())
+        except WriteError as e:
+            if e.code == 11000:
+                logging.info("Found duplicate flat id: %s", item["id"])
+            else:
+                logging.error("Encountered unexpected error while persisting flat:", e)
+
         return item
