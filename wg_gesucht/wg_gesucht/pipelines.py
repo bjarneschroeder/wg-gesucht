@@ -18,25 +18,6 @@ class WgGesuchtPipeline:
     _database: Database
     _collection: Collection
 
-    def __init__(
-        self, connection_uri: str, db_name: str, collection_name: str = "flats"
-    ):
-        self._client = MongoClient(connection_uri, timeoutMS=10000)
-        self._database = self._client[db_name]
-        self._collection = self._database[collection_name]
-
-        self._check_database_connection()
-
-    def _check_database_connection(self):
-        try:
-            logging.info("Pinging database to check connection.")
-            self._client.admin.command("ping")
-        except ServerSelectionTimeoutError:
-            raise ValueError(
-                "Failed to connect to database. "
-                "Please check given connection parameters."
-            )
-
     @classmethod
     def from_crawler(cls, crawler):
         db_settings: Optional[DatabaseSettings] = crawler.settings.get("DB_SETTINGS")
@@ -46,6 +27,26 @@ class WgGesuchtPipeline:
         return cls(
             connection_uri=db_settings.connection_uri, db_name=db_settings.db_name
         )
+
+    def __init__(
+        self, connection_uri: str, db_name: str, collection_name: str = "flats"
+    ):
+        self._client = MongoClient(connection_uri, timeoutMS=10000)
+        self._check_database_connection(client=self._client)
+
+        self._database = self._client[db_name]
+        self._collection = self._database[collection_name]
+        self._collection.create_index("id", name="flat_id", unique=True)
+
+    def _check_database_connection(self, client: MongoClient):
+        try:
+            logging.info("Pinging database to check connection.")
+            client.admin.command("ping")
+        except ServerSelectionTimeoutError:
+            raise ValueError(
+                "Failed to connect to database. "
+                "Please check given connection parameters."
+            )
 
     def process_item(self, item, spider):
         self._collection.insert_one(ItemAdapter(item).asdict())
