@@ -87,8 +87,6 @@ class SearchSettings:
             f"min_rooms={self.min_rooms!r}"
             ")"
         )
-        # log pretty printed settings, maybe use __repr__?
-        # Update Readme.md on how to start and what params to give
 
 
 def load_search_settings(
