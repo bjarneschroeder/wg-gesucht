@@ -123,3 +123,68 @@ You can then run the container with:
 ```shell
 docker run --env-file /path/to/your/env/file wg_gesucht
 ```
+
+## Data Collected
+
+At the moment the project stores the following information in
+the database:
+
+```json
+{
+  "meta": {
+    "found_at": {
+      "$date": "2023-06-10T07:32:08.989Z"
+    },
+    "search_city_name": "Köln"
+  },
+  "id": "10139965",
+  "url": "https://www.wg-gesucht.de/wohnungen-in-Koeln-Dellbrueck.10139965.html",
+  "title": "Shöne 3-zimmer wohnung mit grandiosen ausblick - wohnung in köln-dellbrück",
+  "rooms": 3,
+  "size": {
+    "amount": 88,
+    "unit": "m2"
+  },
+  "rent_costs": {
+    "value": 900,
+    "currency": "EUR"
+  },
+  "utilities_costs": {
+    "value": 250,
+    "currency": "EUR"
+  },
+  "deposit": {
+    "value": 1700,
+    "currency": "EUR"
+  },
+  "other_costs": {
+    "value": 2000,
+    "currency": "EUR"
+  },
+  "street": "Grafenmühlenweg 145",
+  "postal_code": "51069",
+  "city_name": "Köln dellbrück",
+  "move_in_date": "01.09.2023"
+}
+```
+
+As you can see a lot of the provided information is optional since its not mandatory for people issuing
+advertisements on WG-Gesucht to provide all the info.
+Most of the time its provided though.
+
+| Key             | Always Present      | Description                                                               |
+|-----------------|---------------------|---------------------------------------------------------------------------|
+| meta            | :white_check_mark:  | Date object when the item was found and with what search term             |
+| id              | :white_check_mark:  | ID of the flat issued by WG-Gesucht                                       |
+| url             | :white_check_mark:  | URL of the object                                                         |
+| title           | :white_check_mark:  | Title of the advertisement                                                |
+| rooms           | :x:                 | Number of rooms.                                                          |
+| size            | :x:                 | Size of the flat with unit. (ATM always m2)                               |
+| rent_costs      | :x:                 | Costs of the flat aka. "cold rent" with currency(EUR or CHF)              |
+| utilities_costs | :x:                 | Costs for utilities with currency(EUR or CHF). Rent+Utilities="warm rent" |
+| deposit         | :x:                 | Deposit amount needed                                                     |
+| other_costs     | :x:                 | Other costs incurring                                                     |
+| street          | :x:                 | Name and house number of the street the flat is located in                |
+| postal_code     | :white_check_mark:  | Postal code the flat is located in                                        |
+| city_name       | :white_check_mark:  | Name of the city                                                          |
+| move_in_date    | :x:                 | Move in date                                                              |
