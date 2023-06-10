@@ -52,7 +52,7 @@ def parse_move_in_date_str_to_ts(value: str) -> Optional[int]:
         )
 
 
-def parse_size(value: str) -> Optional[dict[str : float | str]]:
+def parse_size(value: str) -> Optional[dict[str, float | str]]:
     if value and isinstance(value, str):
         size_amount = value.split("m", 1)[0]
         if size_amount.isdigit() and "m²" in value:
