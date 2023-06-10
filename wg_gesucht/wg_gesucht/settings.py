@@ -1,5 +1,7 @@
 import os
+from typing import Final
 
+from wg_gesucht.db_settings import DatabaseSettings, load_db_settings
 from wg_gesucht.search_settings import SearchSettings, load_search_settings
 
 # Scrapy settings for wg_gesucht project
@@ -29,7 +31,8 @@ ROBOTSTXT_OBEY = True
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-# DOWNLOAD_DELAY = 3
+DOWNLOAD_DELAY = 3
+
 # The download delay setting will honor only one of:
 # CONCURRENT_REQUESTS_PER_DOMAIN = 16
 # CONCURRENT_REQUESTS_PER_IP = 16
@@ -98,9 +101,14 @@ TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
 
 # Loading Search Settings from env
-SEARCH_SETTINGS: SearchSettings = load_search_settings(
+SEARCH_SETTINGS: Final[SearchSettings] = load_search_settings(
     city_name=os.environ.get("CITY_NAME"),
     only_permanent_contracts=os.environ.get("ONLY_PERMANENT_CONTRACTS"),
     max_rent=os.environ.get("MAX_RENT"),
     min_rooms=os.environ.get("MIN_ROOMS"),
+)
+
+DB_SETTINGS: Final[DatabaseSettings] = load_db_settings(
+    connection_uri=os.environ.get("DB_URI"),
+    db_name=os.environ.get("DB_NAME"),
 )

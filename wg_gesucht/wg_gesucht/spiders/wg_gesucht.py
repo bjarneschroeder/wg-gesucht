@@ -1,6 +1,7 @@
 import json
 import logging
 import re
+from datetime import datetime
 from typing import Final, Optional
 from urllib.parse import urlencode
 
@@ -17,6 +18,10 @@ class WgGesuchtSpider(Spider):
     _logger = logging.getLogger()
 
     def start_requests(self):
+        """Starts the scraping process with getting the settings
+
+        Returns: Request for the city id which is needed for further requests.
+        """
         self._search_settings: SearchSettings = self.settings.get("SEARCH_SETTINGS")
 
         base_url: Final[str] = "https://www.wg-gesucht.de/ajax/getCities.php?"
@@ -27,7 +32,12 @@ class WgGesuchtSpider(Spider):
         url: Final[str] = base_url + urlencode(params)
         yield Request(url=url, callback=self.parse_city_response)
 
-    def parse_city_response(self, response):
+    def parse_city_response(self, response) -> Optional[Request]:
+        """Parses the response from the city request. If the city id could
+        not be retrieved, the spider is stopped.
+
+        Returns: Request for the flat search with the extracted city id.
+        """
         if not response.body:
             self._logger.error("Response body is empty")
             return
@@ -55,6 +65,11 @@ class WgGesuchtSpider(Spider):
             )
 
     def _get_city_id_from_city_data(self, city_data: dict) -> Optional[str]:
+        """Gets the city id from the city data. The city data is the json
+        response from the city id request. See the start_requests method.
+
+        Returns: City id as string or None if the city id was not found.
+        """
         city_name: str = self._search_settings.city_name.lower()
         for city_info in city_data:
             if city_name == city_info["city_name"].lower():
@@ -63,7 +78,7 @@ class WgGesuchtSpider(Spider):
     def _load_search_request_params(self) -> dict[str, str]:
         """Loads the parameters for the flat search request.
 
-        Does not check validity of the search settings.
+        Does not check validity of the user search settings.
         This is done during the settings loading.
 
         Returns: dict with the parameters for the flat search request
@@ -93,7 +108,8 @@ class WgGesuchtSpider(Spider):
 
     def _remove_umlaute(self, text: str) -> str:
         """Removes german umlaute from the given text.
-        Example: "München" -> "Muenchen"
+
+        Returns: Text without umlaute. ("München" -> "Muenchen")
         """
         umlaut_replacements: Final[dict[str, str]] = {
             "Ä": "Ae",
@@ -105,7 +121,14 @@ class WgGesuchtSpider(Spider):
         }
         return text.translate(str.maketrans(umlaut_replacements))
 
-    def parse_flat_detail_links(self, response) -> Request | None:
+    def parse_flat_detail_links(self, response) -> Optional[Request]:
+        """Parses the response from the flat search request.
+        We are at the first page of the flat search results.
+        Extracts all the links to the flat detail pages.
+
+        Returns: Requests for the detail page of the flats.
+        """
+
         # not containing onclick, because thats just an ad
         flat_item_containers: Final[list[Selector]] = response.xpath(
             '//div[contains(@class, "wgg_card offer_list_item") \
@@ -123,6 +146,13 @@ class WgGesuchtSpider(Spider):
             )
 
     def parse_flat(self, response) -> FlatItem:
+        """Parses the response from the flat detail page
+        and extracts the flat data.
+
+        For item transformation see the FlatItemLoader class.
+
+        Returns: FlatItem with the extracted data. (Flats go to the pipeline from here)
+        """
         flat_loader: Final[FlatItemLoader] = FlatItemLoader(
             item=FlatItem(), response=response
         )
@@ -181,6 +211,13 @@ class WgGesuchtSpider(Spider):
             '//div[@class="col-sm-3"]/p/b/text()'
         ).get()
         flat_loader.add_value("move_in_date", move_in_date_txt)
-        flat_loader.add_value("move_in_date_ts", move_in_date_txt)
+
+        flat_loader.add_value(
+            "meta",
+            {
+                "found_at": datetime.utcnow(),
+                "search_city_name": self._search_settings.city_name,
+            },
+        )
 
         yield flat_loader.load_item()

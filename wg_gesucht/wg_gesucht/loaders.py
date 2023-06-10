@@ -1,25 +1,25 @@
 import re
-from datetime import datetime, timezone
-from decimal import Decimal
+from datetime import datetime
+from typing import Optional
 
 from itemloaders.processors import Identity, MapCompose, TakeFirst
 from scrapy.loader import ItemLoader
 
 
-def parse_room_amount_str_to_decimal(value: str) -> Decimal | None:
+def parse_room_amount_str_to_float(value: str) -> Optional[float]:
     if value and isinstance(value, str):
-        return round(Decimal(value.replace(",", ".")), 1)
+        return round(float(value.replace(",", ".")), 1)
 
 
-def remove_whitespace_and_returns(value: str) -> str | None:
+def remove_whitespace_and_returns(value: str) -> Optional[str]:
     if value and isinstance(value, str):
         result = value.replace("\r", " ").replace("\n", " ").strip()
         return re.sub(" +", " ", result)
 
 
-def parse_cost_str(value: str) -> dict[str, Decimal | str] | None:
+def parse_cost_str(value: str) -> Optional[dict[str, float | str]]:
     """Extracts the currency and value from the cost string
-    and parses the value to a decimal.
+    and parses the value to a float.
 
     Currently only implemented for EUR and CHF.
     """
@@ -33,32 +33,21 @@ def parse_cost_str(value: str) -> dict[str, Decimal | str] | None:
         else:
             return None
         return {
-            "value": round(Decimal(value.split(split_char, 1)[0].replace(",", ".")), 2),
+            "value": round(float(value.split(split_char, 1)[0].replace(",", ".")), 2),
             "currency": currency,
         }
 
 
-def parse_move_in_date_str_to_date(value: str) -> str | None:
+def parse_move_in_date_str_to_date(value: str) -> Optional[str]:
     if value and isinstance(value, str):
-        return (
-            datetime.strptime(value, "%d.%m.%Y").date().strftime("%d.%m.%Y")
-        )  # maybe getting actual timestamp #TODO more defensive
+        return datetime.strptime(value, "%d.%m.%Y").date().strftime("%d.%m.%Y")
 
 
-def parse_move_in_date_str_to_ts(value: str) -> int | None:
-    if value and isinstance(value, str):
-        return int(
-            datetime.strptime(value, "%d.%m.%Y")
-            .replace(tzinfo=timezone.utc)
-            .timestamp()
-        )
-
-
-def parse_size(value: str) -> dict[str : Decimal | str] | None:
+def parse_size(value: str) -> Optional[dict[str, float | str]]:
     if value and isinstance(value, str):
         size_amount = value.split("m", 1)[0]
         if size_amount.isdigit() and "m²" in value:
-            return {"amount": Decimal(size_amount), "unit": "m2"}
+            return {"amount": float(size_amount), "unit": "m2"}
 
 
 class FlatItemLoader(ItemLoader):
@@ -66,12 +55,13 @@ class FlatItemLoader(ItemLoader):
     default_output_processor = TakeFirst()
 
     id_in = MapCompose(str.strip)
+
+    # meta
     # url
+
     title_in = MapCompose(remove_whitespace_and_returns, str.capitalize)
 
-    rooms_in = MapCompose(
-        remove_whitespace_and_returns, parse_room_amount_str_to_decimal
-    )
+    rooms_in = MapCompose(remove_whitespace_and_returns, parse_room_amount_str_to_float)
 
     size_in = MapCompose(remove_whitespace_and_returns, parse_size)
 
@@ -93,8 +83,4 @@ class FlatItemLoader(ItemLoader):
 
     move_in_date_in = MapCompose(
         remove_whitespace_and_returns, parse_move_in_date_str_to_date
-    )
-
-    move_in_date_ts_in = MapCompose(
-        remove_whitespace_and_returns, parse_move_in_date_str_to_ts
     )
