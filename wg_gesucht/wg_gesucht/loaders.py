@@ -65,7 +65,10 @@ class FlatItemLoader(ItemLoader):
     default_output_processor = TakeFirst()
 
     id_in = MapCompose(str.strip)
+
+    # meta
     # url
+
     title_in = MapCompose(remove_whitespace_and_returns, str.capitalize)
 
     rooms_in = MapCompose(remove_whitespace_and_returns, parse_room_amount_str_to_float)

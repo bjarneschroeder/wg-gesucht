@@ -8,6 +8,7 @@ import scrapy
 
 class FlatItem(scrapy.Item):
     id = scrapy.Field()
+    meta = scrapy.Field()
     url = scrapy.Field()
     title = scrapy.Field()
     rooms = scrapy.Field()

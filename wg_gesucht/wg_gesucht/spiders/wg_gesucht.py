@@ -1,6 +1,7 @@
 import json
 import logging
 import re
+from datetime import datetime
 from typing import Final, Optional
 from urllib.parse import urlencode
 
@@ -182,5 +183,13 @@ class WgGesuchtSpider(Spider):
         ).get()
         flat_loader.add_value("move_in_date", move_in_date_txt)
         flat_loader.add_value("move_in_date_ts", move_in_date_txt)
+
+        flat_loader.add_value(
+            "meta",
+            {
+                "found_at": datetime.utcnow(),
+                "search_city_name": self._search_settings.city_name,
+            },
+        )
 
         yield flat_loader.load_item()
