@@ -1,22 +1,23 @@
 import re
 from datetime import datetime, timezone
+from typing import Optional
 
 from itemloaders.processors import Identity, MapCompose, TakeFirst
 from scrapy.loader import ItemLoader
 
 
-def parse_room_amount_str_to_float(value: str) -> float | None:
+def parse_room_amount_str_to_float(value: str) -> Optional[float]:
     if value and isinstance(value, str):
         return round(float(value.replace(",", ".")), 1)
 
 
-def remove_whitespace_and_returns(value: str) -> str | None:
+def remove_whitespace_and_returns(value: str) -> Optional[str]:
     if value and isinstance(value, str):
         result = value.replace("\r", " ").replace("\n", " ").strip()
         return re.sub(" +", " ", result)
 
 
-def parse_cost_str(value: str) -> dict[str, float | str] | None:
+def parse_cost_str(value: str) -> Optional[dict[str, float | str]]:
     """Extracts the currency and value from the cost string
     and parses the value to a float.
 
@@ -37,14 +38,12 @@ def parse_cost_str(value: str) -> dict[str, float | str] | None:
         }
 
 
-def parse_move_in_date_str_to_date(value: str) -> str | None:
+def parse_move_in_date_str_to_date(value: str) -> Optional[str]:
     if value and isinstance(value, str):
-        return (
-            datetime.strptime(value, "%d.%m.%Y").date().strftime("%d.%m.%Y")
-        )  # maybe getting actual timestamp #TODO more defensive
+        return datetime.strptime(value, "%d.%m.%Y").date().strftime("%d.%m.%Y")
 
 
-def parse_move_in_date_str_to_ts(value: str) -> int | None:
+def parse_move_in_date_str_to_ts(value: str) -> Optional[int]:
     if value and isinstance(value, str):
         return int(
             datetime.strptime(value, "%d.%m.%Y")
@@ -53,7 +52,7 @@ def parse_move_in_date_str_to_ts(value: str) -> int | None:
         )
 
 
-def parse_size(value: str) -> dict[str : float | str] | None:
+def parse_size(value: str) -> Optional[dict[str : float | str]]:
     if value and isinstance(value, str):
         size_amount = value.split("m", 1)[0]
         if size_amount.isdigit() and "m²" in value:
