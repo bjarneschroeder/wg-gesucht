@@ -1,5 +1,5 @@
 import re
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Optional
 
 from itemloaders.processors import Identity, MapCompose, TakeFirst
@@ -43,15 +43,6 @@ def parse_move_in_date_str_to_date(value: str) -> Optional[str]:
         return datetime.strptime(value, "%d.%m.%Y").date().strftime("%d.%m.%Y")
 
 
-def parse_move_in_date_str_to_ts(value: str) -> Optional[int]:
-    if value and isinstance(value, str):
-        return int(
-            datetime.strptime(value, "%d.%m.%Y")
-            .replace(tzinfo=timezone.utc)
-            .timestamp()
-        )
-
-
 def parse_size(value: str) -> Optional[dict[str, float | str]]:
     if value and isinstance(value, str):
         size_amount = value.split("m", 1)[0]
@@ -92,8 +83,4 @@ class FlatItemLoader(ItemLoader):
 
     move_in_date_in = MapCompose(
         remove_whitespace_and_returns, parse_move_in_date_str_to_date
-    )
-
-    move_in_date_ts_in = MapCompose(
-        remove_whitespace_and_returns, parse_move_in_date_str_to_ts
     )

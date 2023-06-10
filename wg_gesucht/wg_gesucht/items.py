@@ -22,4 +22,3 @@ class FlatItem(scrapy.Item):
     postal_code = scrapy.Field()
     city_name = scrapy.Field()
     move_in_date = scrapy.Field()
-    move_in_date_ts = scrapy.Field()

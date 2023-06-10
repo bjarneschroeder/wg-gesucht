@@ -211,7 +211,6 @@ class WgGesuchtSpider(Spider):
             '//div[@class="col-sm-3"]/p/b/text()'
         ).get()
         flat_loader.add_value("move_in_date", move_in_date_txt)
-        flat_loader.add_value("move_in_date_ts", move_in_date_txt)
 
         flat_loader.add_value(
             "meta",
