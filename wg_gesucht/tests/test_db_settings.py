@@ -1,6 +1,5 @@
 import pytest
-
-from wg_gesucht.wg_gesucht.db_settings import DatabaseSettings
+from wg_gesucht.db_settings import DatabaseSettings
 
 
 class TestDatabaseSettings:

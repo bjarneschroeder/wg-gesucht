@@ -1,6 +1,5 @@
 import pytest
-
-from wg_gesucht.wg_gesucht.search_settings import SearchSettings
+from wg_gesucht.search_settings import SearchSettings
 
 
 class TestSearchSettingsInit:
